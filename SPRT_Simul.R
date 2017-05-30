@@ -43,8 +43,10 @@ FourBounds <- numeric(2) ##These are the Real.Bounds from SPRT_KnownLosses.R. Th
 FourBounds[1] <- 1/2
 FourBounds[2] <- 31/42
 
-ClassicalCost <- numeric(3000000)
-AdaptiveCost <- numeric(3000000)
+trials <- 3000000 ## Number of trials for each classical and adaptive
+
+ClassicalCost <- numeric(trials)
+AdaptiveCost <- numeric(trials)
 trueTheta <- 1 ## We begin with the true value of theta = 1, later done with 4
 TypeIIErrors <- 0
 floatTol <- 1e-5
@@ -67,7 +69,7 @@ TestResult <- function(trueDist){ #This function takes in the true distribution 
   }
 }
 
-while(TypeIIErrors < 2000000){
+while(TypeIIErrors < ThetaPrior[1]*trials){ ##Trial proprtion chosen in accordance with prior
   #This bit runs an SPRT first. This is where we don't know the information. We keep repeating until we make a Type II error.
   #Only then we record the loss made, store it in the ClassicalCost vector, and learn the real value of theta and repeat.
   #cat("Trial begins\n")
@@ -145,7 +147,7 @@ while(TypeIIErrors < 2000000){
 }
 TypeIIErrors <- 0
 
-while(TypeIIErrors < 2000000){
+while(TypeIIErrors < ThetaPrior[1]*trials){
   #This bit runs an SPRT first. This is where we don't know the information. We keep repeating until we make a Type II error.
   #Only then we record the loss made, store it in the ClassicalCost vector, and learn the real value of theta and repeat.
   #cat("Trial begins\n")
@@ -228,7 +230,7 @@ while(TypeIIErrors < 2000000){
 trueTheta <- 4
 TypeIIErrors <- 0
 
-while(TypeIIErrors < 1000000){
+while(TypeIIErrors < ThetaPrior[2]*trials){
   #This bit runs an SPRT first. This is where we don't know the information. We keep repeating until we make a Type II error.
   #Only then we record the loss made, store it in the ClassicalCost vector, and learn the real value of theta and repeat.
   #cat("Trial begins\n")
@@ -252,7 +254,7 @@ while(TypeIIErrors < 1000000){
   if(identical(guess, 1) && identical(trueDist, 0)){ #Type II, otherwise we don't care.
     #cat("Made an Error!\n")
     TypeIIErrors <- TypeIIErrors + 1
-    ClassicalCost[TypeIIErrors+2000000] <- cost + trueTheta
+    ClassicalCost[TypeIIErrors+ThetaPrior[1]*trials] <- cost + trueTheta
     #cat("Current Error is: ")
     #cat(ClassicalCost[TypeIIErrors])
     #cat("\n")
@@ -306,7 +308,7 @@ while(TypeIIErrors < 1000000){
 }
 TypeIIErrors <- 0
 
-while(TypeIIErrors < 1000000){
+while(TypeIIErrors < ThetaPrior[2]*trials){
   #This bit runs an SPRT first. This is where we don't know the information. We keep repeating until we make a Type II error.
   #Only then we record the loss made, store it in the ClassicalCost vector, and learn the real value of theta and repeat.
   #cat("Trial begins\n")
@@ -330,7 +332,7 @@ while(TypeIIErrors < 1000000){
   if(identical(guess, 1) && identical(trueDist, 0)){ #Type II, otherwise we don't care.
     #cat("Made an Error!\n")
     TypeIIErrors <- TypeIIErrors + 1
-    AdaptiveCost[TypeIIErrors] <- cost + trueTheta
+    AdaptiveCost[TypeIIErrors + ThetaPrior[1]*trials] <- cost + trueTheta
     #cat("Current Error is: ")
     #cat(ClassicalCost[TypeIIErrors])
     #cat("\n")
@@ -369,13 +371,13 @@ while(TypeIIErrors < 1000000){
     #cat("\n")
     if(guess == 1 && trueDist == 0){ #Type II error
       #cat("Type II\n")
-      AdaptiveCost[TypeIIErrors+2000000] <- AdaptiveCost[TypeIIErrors+2000000] + cost + trueTheta
+      AdaptiveCost[TypeIIErrors+ThetaPrior[1]*trials] <- AdaptiveCost[TypeIIErrors+ThetaPrior[1]*trials] + cost + trueTheta
     } else if(guess == 1 && trueDist == 1){ #Type I error
       #cat("Type I\n")
-      AdaptiveCost[TypeIIErrors+2000000] <- AdaptiveCost[TypeIIErrors+2000000] + cost + 2
+      AdaptiveCost[TypeIIErrors+ThetaPrior[1]*trials] <- AdaptiveCost[TypeIIErrors+ThetaPrior[1]*trials] + cost + 2
     } else{
       #cat("Correct\n")
-      AdaptiveCost[TypeIIErrors+2000000] <- AdaptiveCost[TypeIIErrors+2000000] + cost
+      AdaptiveCost[TypeIIErrors+ThetaPrior[1]*trials] <- AdaptiveCost[TypeIIErrors+ThetaPrior[1]*trials] + cost
     }
     #cat("Final Error is: ")
     #cat(ClassicalCost[TypeIIErrors])
